@@ -5307,14 +5307,463 @@ plt.imshow(real_chess)
 ```python
 
 ```
-# edge detection ( own picture) 
+# edge detection 
 
+```python
+import cv2
+```
+
+
+```python
+import numpy as np
+```
+
+
+```python
+import matplotlib.pyplot as plt 
+%matplotlib inline
+```
+
+
+```python
+# uploading picture and plotting it 
+img = cv2.imread("Cat03.jpg")
+plt.imshow(img)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7fddceb539d0>
+
+
+
+
+![png](output_3_1.png)
+
+
+
+```python
+# modifying and plotting to medium threshold 
+edges = cv2.Canny(image =img, threshold1 = 127, threshold2 = 127)
+
+plt.imshow(edges)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7fddbf859390>
+
+
+
+
+![png](output_4_1.png)
+
+
+
+```python
+# finding the median color value 
+med_value = np.median(img)
+med_value
+```
+
+
+
+
+    155.0
+
+
+
+
+```python
+# changing the lower and upper threshold values 
+
+lower = int(max(0, 0.7*med_value))
+upper = int(min(255,1.3*med_value))
+
+edges = cv2.Canny(img, threshold1 = lower, threshold2 = upper)
+
+plt.imshow(edges)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7fddbf843c90>
+
+
+
+
+![png](output_6_1.png)
+
+
+
+```python
+# blurring the picture and plotting new one 
+
+blurred_img = cv2.blur(img, ksize = (5,5))
+
+edges = cv2.Canny(image=blurred_img,
+                 threshold1 = lower,
+                 threshold2 = upper)
+plt.imshow(edges)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7fddbf7a6c90>
+
+
+
+
+![png](output_7_1.png)
+
+
+
+```python
+#retrying the plurrto get a better image
+
+blurred_img = cv2.blur(img, ksize = (7,7))
+
+edges = cv2.Canny(image=blurred_img,
+                 threshold1 = lower,
+                 threshold2 = upper)
+plt.imshow(edges)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7fddbf787dd0>
+
+
+
+
+![png](output_8_1.png)
+
+
+
+```python
+# increasing the upper threshold limit
+
+blurred_img = cv2.blur(img, ksize = (5,5))
+
+edges = cv2.Canny(image=blurred_img,
+                 threshold1 = lower,
+                 threshold2 = upper + 50)
+plt.imshow(edges)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7fddbf6ebfd0>
+
+
+
+
+![png](output_9_1.png)
+
+
+
+```python
+# adjusting upper threshold limits and blurr
+
+blurred_img = cv2.blur(img, ksize = (1,1))
+
+edges = cv2.Canny(image=blurred_img,
+                 threshold1 = lower,
+                 threshold2 = upper + 50)
+plt.imshow(edges)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7fddbc138e10>
+
+
+
+
+![png](output_10_1.png)
+
+
+
+```python
+# adjusting upper threshold limits and blurr
+
+blurred_img = cv2.blur(img, ksize = (8,7))
+
+edges = cv2.Canny(image=blurred_img,
+                 threshold1 = lower,
+                 threshold2 = upper + 50)
+plt.imshow(edges)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7fddbc098f90>
+
+
+
+
+![png](output_11_1.png)
+
+
+
+```python
+
+```
 
 
 
 # feature Detection 
 # Feature match ( apple jacks )
 
+```python
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt 
+%matplotlib inline
+```
+
+
+```python
+# defing how you want the image displayed
+def display(img, cmap = "gray"):
+    fig = plt.figure(figsize = (12, 10))
+    ax = fig.add_subplot(111)
+    ax.imshow(img, cmap = 'gray')
+```
+
+
+```python
+# uploading image of apple jacks cereal box
+apple_jacks = cv2.imread("Apple_Jacks.jpg")
+display(apple_jacks)
+```
+
+
+![png](output_2_0.png)
+
+
+
+```python
+# uploading new image of multiple cereal boxes and displaying it 
+cereals = cv2.imread("All_Cereal.jpg", 0)
+display(cereals)
+```
+
+
+![png](output_3_0.png)
+
+
+
+```python
+# group force matching 
+
+orb = cv2.ORB_create()
+
+kp1,des1 = orb.detectAndCompute(apple_jacks, mask=None)
+kp2,des2 = orb.detectAndCompute(cereals, mask=None)
+```
+
+
+```python
+# Running Brute force matching 
+# this is where the actual matching is taking place 
+
+bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck = True)
+matches= bf.match(des1, des2)
+```
+
+
+```python
+# sorting matches 
+
+matches = sorted(matches, key = lambda x:x.distance)
+```
+
+
+```python
+# listing the matches 
+apple_jacks_matches = cv2.drawMatches(apple_jacks, kp1, cereals, kp2, matches[:25], None, flags=2)
+```
+
+
+```python
+# displaying the matches between the images 
+display(apple_jacks_matches)
+```
+
+
+![png](output_8_0.png)
+
+
+
+```python
+# unsing sift method 
+sift = cv2.SIFT_create()
+```
+
+
+```python
+# getting features from each through sift method 
+
+kp1, des1 = sift.detectAndCompute(apple_jacks, None)
+kp2, des2 = sift.detectAndCompute(cereals, None)
+```
+
+
+```python
+# finds best matcher from each set 
+bf = cv2.BFMatcher()
+matches = bf.knnMatch(des1, des2, k=2)
+```
+
+
+```python
+# applying a ratio test 
+
+good = []
+
+for match1, match2 in matches:
+    if match1.distance < 0.75*match2.distance:
+        good.append([match1])
+```
+
+
+```python
+# writing to print the length and amount of good matches found 
+
+print('Length of total matches:', len(matches))
+print('Length of good matches:', len(good))
+```
+
+    Length of total matches: 640
+    Length of good matches: 41
+
+
+
+```python
+# displaying the matches found 
+sift_matches = cv2.drawMatchesKnn(apple_jacks, kp1, cereals, kp2, good, None, flags = 2)
+display(sift_matches)
+```
+
+
+![png](output_14_0.png)
+
+
+
+```python
+# using flann base matching 
+
+sift = cv2.SIFT_create()
+
+kp1, des1 = sift.detectAndCompute(apple_jacks, None)
+kp2, des2 = sift.detectAndCompute(cereals, None)
+```
+
+
+```python
+flann_index_KDtree = 0
+index_params = dict(algorithm=flann_index_KDtree, trees = 5)
+search_params = dict(checks=50)
+```
+
+
+```python
+# running the matcher after finding the parameters 
+# identifying features in both the apple jack box and the cereal boxs in order to match them
+
+flann = cv2.FlannBasedMatcher(index_params, search_params)
+
+matches = flann.knnMatch(des1, des2, k=2)
+
+good = []
+
+for match1, match2, in matches: 
+    if match1.distance < 0.75*match2.distance:
+        good.append([match1])
+```
+
+
+```python
+# listing matches and displaying them through flann method 
+
+flann_matches = cv2.drawMatchesKnn(apple_jacks, kp1, cereals, kp2, good, None, flags = 0)
+display(flann_matches)
+```
+
+
+![png](output_18_0.png)
+
+
+
+```python
+# adding a mask to it 
+
+sift = cv2.SIFT_create()
+
+kp1, des1 = sift.detectAndCompute(apple_jacks, None)
+kp2, des2 = sift.detectAndCompute(cereals, None)
+```
+
+
+```python
+flann_index_KDtree = 0 
+index_params = dict(algorithm= flann_index_KDtree, trees = 5)
+
+search_param = dict(checks = 50)
+```
+
+
+```python
+flann = cv2.FlannBasedMatcher(index_params, search_params)
+
+matches = flann.knnMatch(des1, des2, k=2)
+```
+
+
+```python
+matchesMask = [[0,0] for i in range (len(matches))]
+```
+
+
+```python
+# reducing the distance between features to get better matches 
+
+for i, (match1, match2) in enumerate(matches):
+    if match1.distance <0.75*match2.distance:
+        matchesMask[1] = [1,0]
+        
+draw_params = dict(matchColor = (0,255,0),
+                  singlePointColor = (255,0,0),
+                  matchesMask = matchesMask,
+                  flags = 0)
+```
+
+
+```python
+# listing matches and displaying image of matches
+
+flann_matches = cv2.drawMatchesKnn(apple_jacks, kp1, cereals, kp2, matches, None, **draw_params)
+
+display(flann_matches)
+```
+
+
+![png](output_24_0.png)
+
+
+
+```python
+
+```
 
 
 
